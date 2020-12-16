@@ -29,7 +29,6 @@
 				url: "calendar/calendar_move.php",
 				data: args,
 				success: function(ajax) {
-					console.log(args);
 					var response = ajax.data;
 				}
 			});
@@ -97,7 +96,6 @@
                     event_id: args.e.data.id,
                 },
                 success: function(data) {
-                    console.log(data);
                     html = "Prie treniruotės prisiregistravo " + data.length + " žmonės";
                     if(data.length > 0) {
                         html += ":<br>";
@@ -108,7 +106,7 @@
                                 arrived = "";
                             }
                             html += '<div class="form-check">';
-                            html += '<input class="form-check-input" type="checkbox" id="check' + data[index].user_id + '" ' + arrived + '>';
+                            html += '<input class="form-check-input" type="checkbox" onclick="updateArrived(' + data[index].user_id + ', ' + args.e.data.id + ')" id="check' + data[index].user_id + '" ' + arrived + '>';
                             html += '<label class="form-check-label" for="check' + data[index].user_id + '">' + data[index].email + '</label>';
                             html += '</div>';
                         }
@@ -116,7 +114,19 @@
                     $("#eventInfoText").html(html);
                 }
             });
-		};
+        };
+        function updateArrived(user_id, event_id) {
+            console.log($('#check' + user_id).is(":checked"));
+            $.ajax({
+                url: "include/change_arrived.php",
+                type: "post",
+                data: { 
+                    event: event_id,
+                    user: user_id,
+                    arrived: $('#check' + user_id).is(":checked")
+                },
+            });
+        }
 	<?php } else if($logged_in) { ?>
 		calendar.eventClickHandling = "Enabled";
 		calendar.onEventClick = function (args) {
@@ -198,8 +208,6 @@
                 },
                 success: function(data) {
                     var obj = JSON.parse(data);
-                    console.log(obj);
-                    console.log(obj.busy);
                     if(obj.busy.length > 0) {
                         html = "Pasirinktu laiku kalendoriuje yra pridėta kitų įvykių:<br>";
                         for (index = 0; index < obj.busy.length; ++index) {
